@@ -2,5 +2,7 @@ Options +ExecCGI
 AddHandler wsgi-script .py
 
 RewriteEngine On
+RewriteRule ^\.(git|env)(/|$) - [F,L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ /wsgi.py/$1 [QSA,PT]
