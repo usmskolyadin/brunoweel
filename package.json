@@ -1,0 +1,13 @@
+{
+  "name": "brunovil",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./static/src/input.css -o ./static/css/site.css --minify",
+    "watch:css": "tailwindcss -i ./static/src/input.css -o ./static/css/site.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}
