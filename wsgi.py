@@ -8,13 +8,13 @@ looks for a wsgi.py at the site root per its .htaccess rewrite rule.
 import os
 import sys
 
-DOMAIN_DIR = os.path.expanduser("~/brunoweel.ru")
+SITE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-activate_this = os.path.join(DOMAIN_DIR, "venv", "bin", "activate_this.py")
+activate_this = os.path.expanduser("~/venv/bin/activate_this.py")
 with open(activate_this) as f:
     exec(f.read(), {"__file__": activate_this})
 
-sys.path.insert(1, os.path.join(DOMAIN_DIR, "public_html"))
+sys.path.insert(1, SITE_DIR)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doghotel.settings")
 
