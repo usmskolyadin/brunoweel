@@ -5,4 +5,5 @@ db.sqlite3
 node_modules/
 static/css/site.css
 staticfiles/
+media/
 .env

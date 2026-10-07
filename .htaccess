@@ -4,5 +4,7 @@ AddHandler wsgi-script .py
 RewriteEngine On
 RewriteRule ^\.(git|env)(/|$) - [F,L]
 
+RewriteRule ^static/admin/(.*)$ staticfiles/admin/$1 [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ /wsgi.py/$1 [QSA,PT]
