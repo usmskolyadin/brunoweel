@@ -7,17 +7,23 @@ looks for a wsgi.py at the site root per its .htaccess rewrite rule.
 
 import os
 import sys
+import traceback
 
 SITE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-activate_this = os.path.expanduser("~/venv/bin/activate_this.py")
-with open(activate_this) as f:
-    exec(f.read(), {"__file__": activate_this})
+try:
+    activate_this = os.path.expanduser("~/venv/bin/activate_this.py")
+    with open(activate_this) as f:
+        exec(f.read(), {"__file__": activate_this})
 
-sys.path.insert(1, SITE_DIR)
+    sys.path.insert(1, SITE_DIR)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doghotel.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doghotel.settings")
 
-from django.core.wsgi import get_wsgi_application  # noqa: E402
+    from django.core.wsgi import get_wsgi_application  # noqa: E402
 
-application = get_wsgi_application()
+    application = get_wsgi_application()
+except Exception:
+    with open(os.path.join(SITE_DIR, "wsgi_error.log"), "a") as log:
+        log.write(traceback.format_exc() + "\n")
+    raise
