@@ -12,7 +12,7 @@ import traceback
 SITE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 try:
-    activate_this = os.path.expanduser("~/venv/bin/activate_this.py")
+    activate_this = os.path.join(SITE_DIR, "venv", "bin", "activate_this.py")
     with open(activate_this) as f:
         exec(f.read(), {"__file__": activate_this})
 
