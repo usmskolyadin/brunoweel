@@ -210,8 +210,13 @@ deactivate
 
 ## 2. Gunicorn как systemd-сервис
 
+Эти и все следующие команды с `sudo` — выполняются из-под `root`
+(`exit` из `brunoweel`, если переключался). Путь к проекту здесь и
+дальше указываем **полностью**, а не через `~` — под root `~` ведёт в
+`/root`, а не в домашнюю папку `brunoweel`:
+
 ```bash
-sudo cp ~/brunoweel.ru/deploy/gunicorn.service /etc/systemd/system/gunicorn.service
+sudo cp /home/brunoweel/brunoweel.ru/deploy/gunicorn.service /etc/systemd/system/gunicorn.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now gunicorn
 sudo systemctl status gunicorn
@@ -226,7 +231,7 @@ sudo systemctl status gunicorn
 ## 3. nginx
 
 ```bash
-sudo cp ~/brunoweel.ru/deploy/nginx.conf /etc/nginx/sites-available/brunoweel.ru
+sudo cp /home/brunoweel/brunoweel.ru/deploy/nginx.conf /etc/nginx/sites-available/brunoweel.ru
 sudo ln -s /etc/nginx/sites-available/brunoweel.ru /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 
@@ -251,7 +256,7 @@ Certbot сам допишет в `/etc/nginx/sites-available/brunoweel.ru` бл�
 После этого включить строгие cookie/редирект в `.env`:
 
 ```bash
-nano ~/brunoweel.ru/.env
+sudo nano /home/brunoweel/brunoweel.ru/.env
 # DJANGO_SECURE_SSL_REDIRECT=True
 sudo systemctl restart gunicorn
 ```
@@ -260,7 +265,8 @@ sudo systemctl restart gunicorn
 
 ## 5. Повторный деплой (обновления)
 
-После `git push` в `main` на локальной машине — на сервере:
+После `git push` в `main` на локальной машине — на сервере, **под
+пользователем `brunoweel`** (`su - brunoweel`, если сейчас root):
 
 ```bash
 cd ~/brunoweel.ru
@@ -277,7 +283,7 @@ cd ~/brunoweel.ru
 ```bash
 sudo systemctl status gunicorn        # статус приложения
 sudo journalctl -u gunicorn -f        # логи gunicorn (stdout/stderr)
-tail -f ~/brunoweel.ru/gunicorn-error.log
+tail -f /home/brunoweel/brunoweel.ru/gunicorn-error.log
 sudo systemctl status nginx
 sudo nginx -t                         # проверка конфига перед reload
 sudo certbot renew --dry-run          # проверка автопродления SSL
