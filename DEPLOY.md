@@ -145,8 +145,16 @@ sudo apt install -y nodejs
 A-записи `brunoweel.ru` и `www.brunoweel.ru` на IP нового облачного
 сервера (вместо старого shared-хостинга).
 
-Дальше всё выполняется от имени пользователя `brunoweel` (`su - brunoweel`
-или новая SSH-сессия).
+Дальше всё выполняется от имени пользователя `brunoweel`, **не root**:
+
+```bash
+su - brunoweel
+```
+
+(или новая SSH-сессия: `ssh brunoweel@<IP_сервера>`). Если пропустить
+этот шаг и клонировать проект под root — всё окажется в `/root/...`
+вместо `/home/brunoweel/...`, и `gunicorn.service`/`nginx.conf` ниже не
+найдут проект.
 
 ---
 
