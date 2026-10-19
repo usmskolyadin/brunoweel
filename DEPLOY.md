@@ -1,94 +1,245 @@
-# Деплой на Timeweb Hosting (shared, Apache + mod_wsgi)
+# Деплой на Timeweb Cloud (облачный сервер)
 
-Домен `brunoweel.ru` уже зарегистрирован на Timeweb. Хостинг — classic shared
-(hosting.timeweb.ru), без root-доступа: Python-приложения там обслуживает
-Apache через `mod_wsgi`, а не gunicorn/Passenger.
+Домен `brunoweel.ru` зарегистрирован на Timeweb. Ниже — деплой на **облачный
+сервер** (VPS с root-доступом), а не на shared-хостинг: Ubuntu 24.04,
+nginx как reverse proxy и gunicorn как systemd-сервис, без Apache/mod_wsgi.
 
-## Что уже подготовлено в репозитории
+Что уже подготовлено в репозитории:
 
 - [doghotel/settings.py](doghotel/settings.py) — `SECRET_KEY`, `DEBUG`,
-  `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` берутся из `.env` (через
-  `python-dotenv`), а не хардкодятся. Без `.env` локально поведение как
-  раньше (`DEBUG=True`, `localhost`).
-- `.env.example` — шаблон продакшен-переменных, на сервере скопировать в
-  `.env` и заполнить реальными значениями.
-- [wsgi.py](wsgi.py) (корень проекта) — точка входа для Apache/mod_wsgi:
-  активирует venv и запускает `doghotel.wsgi`. Путь `~/brunoweel.ru`
-  зашит внутри — это стандартная для Timeweb структура каталогов
-  (совпадает с именем сайта/домена в панели).
-- [.htaccess](.htaccess) (корень проекта) — перенаправляет все запросы на
-  `wsgi.py`.
-- [requirements.txt](requirements.txt) — `Django`, `python-dotenv`.
-  `gunicorn` не нужен — на этом хостинге процесс обслуживает сам Apache.
+  `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` берутся из `.env`; добавлен
+  `SECURE_PROXY_SSL_HEADER`, чтобы Django понимал, что nginx отдал запрос
+  по HTTPS.
+- [.env.example](.env.example) — шаблон продакшен-переменных.
+- [requirements.txt](requirements.txt) — добавлен `gunicorn`.
+- [deploy/gunicorn.service](deploy/gunicorn.service) — systemd-юнит для
+  gunicorn.
+- [deploy/nginx.conf](deploy/nginx.conf) — конфиг сайта для nginx
+  (статика, медиа, прокси на gunicorn).
+- [deploy/deploy.sh](deploy/deploy.sh) — скрипт повторного деплоя
+  (`git pull` → сборка CSS → миграции → collectstatic → restart).
 
-## Шаги
+---
 
-1. **Тариф с SSH.** Нужен доступ по SSH для `virtualenv`/`pip install`.
-   Если на текущем тарифе SSH нет — включить в панели или сменить тариф.
+## 0. Первоначальная настройка нового облачного сервера
 
-2. **Создать сайт на домен.** В разделе «Сайты» панели создать сайт на
-   `brunoweel.ru`, если ещё не создан — Timeweb сам создаёт структуру
-   `~/brunoweel.ru/public_html`. Домен привязать к этому сайту/тарифу в
-   разделе «Домены» (DNS обычно уже настроен, т.к. домен зарегистрирован
-   там же).
+Выполняется один раз сразу после создания сервера в панели Timeweb Cloud
+(рекомендуемый образ — **Ubuntu 24.04 LTS**; минимального тарифа 1 CPU /
+1 GB RAM для этого сайта достаточно).
 
-3. **Собрать Tailwind CSS локально** (на хостинге Node может не быть):
-   ```powershell
-   npm run build:css
-   ```
+### 0.1. Первый вход и создание рабочего пользователя
 
-4. **Подключиться по SSH и создать venv** (Python 3.10 / Ubuntu 22.04 у
-   Timeweb):
-   ```bash
-   cd ~/brunoweel.ru
-   wget https://bootstrap.pypa.io/virtualenv/3.10/virtualenv.pyz
-   python3 virtualenv.pyz venv
-   source venv/bin/activate
-   ```
+Timeweb даёт root-пароль по почте/в панели. Заходим под root и сразу
+создаём обычного пользователя — работать и разворачивать проект под root
+не нужно:
 
-5. **Залить проект** по SFTP/SCP в `~/brunoweel.ru/public_html` — всё
-   содержимое репозитория, **кроме** `.venv`, `node_modules`,
-   `__pycache__`, `db.sqlite3` (её пересоздать миграциями на сервере).
+```bash
+ssh root@<IP_сервера>
 
-6. **Установить зависимости и накатить миграции:**
-   ```bash
-   pip install -r public_html/requirements.txt
-   cd public_html
-   cp .env.example .env
-   nano .env   # реальный SECRET_KEY, DEBUG=False,
-               # ALLOWED_HOSTS=brunoweel.ru,www.brunoweel.ru
-   python manage.py migrate
-   python manage.py createsuperuser
-   ```
+apt update && apt upgrade -y
 
-7. **Если Django требует более новый SQLite** («SQLite 3.31 or later is
-   required») — на Python 3.10/Ubuntu 22.04 обычно не возникает; если
-   всё же появится, нужен костыль с `pysqlite3` (см. официальную доку
-   Timeweb по Django, ссылка ниже).
+adduser brunoweel
+usermod -aG sudo brunoweel
+```
 
-8. **Перезапустить приложение** — mod_wsgi подхватывает изменения по
-   времени модификации `wsgi.py`:
-   ```bash
-   touch public_html/wsgi.py
-   ```
+Скопировать свой SSH-ключ на нового пользователя (с локальной машины):
 
-9. **Включить SSL.** В разделе SSL-сертификатов панели подключить
-   бесплатный Let's Encrypt для `brunoweel.ru` и `www.brunoweel.ru`.
-   После этого в `.env` прописать:
-   ```
-   DJANGO_CSRF_TRUSTED_ORIGINS=https://brunoweel.ru,https://www.brunoweel.ru
-   ```
+```bash
+ssh-copy-id brunoweel@<IP_сервера>
+# если ssh-copy-id недоступен (Windows) — вручную добавить публичный ключ
+# в /home/brunoweel/.ssh/authorized_keys на сервере
+```
+
+Проверить, что входит по ключу без пароля (`ssh brunoweel@<IP_сервера>`),
+и только после этого отключить вход под root и по паролю:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+# PermitRootLogin no
+# PasswordAuthentication no
+sudo systemctl restart ssh
+```
+
+### 0.2. Базовая защита
+
+```bash
+sudo apt install -y ufw fail2ban
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+
+sudo timedatectl set-timezone Europe/Moscow
+```
+
+Если тариф с 1 GB RAM — добавить swap, иначе `pip install`/сборка CSS
+могут падать по памяти:
+
+```bash
+sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+### 0.3. Системные пакеты
+
+```bash
+sudo apt install -y python3 python3-venv python3-pip git nginx certbot python3-certbot-nginx
+```
+
+Node.js (нужен только для сборки Tailwind CSS):
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+### 0.4. DNS
+
+В панели Timeweb (раздел «Домены» → `brunoweel.ru` → DNS) указать
+A-записи `brunoweel.ru` и `www.brunoweel.ru` на IP нового облачного
+сервера (вместо старого shared-хостинга).
+
+Дальше всё выполняется от имени пользователя `brunoweel` (`su - brunoweel`
+или новая SSH-сессия).
+
+---
+
+## 1. Клонирование и настройка проекта
+
+```bash
+cd ~
+git clone https://github.com/usmskolyadin/brunoweel.git brunoweel.ru
+cd brunoweel.ru
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+npm ci
+npm run build:css
+```
+
+Настроить `.env`:
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+```
+DJANGO_SECRET_KEY=<сгенерировать, см. ниже>
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=brunoweel.ru,www.brunoweel.ru
+DJANGO_CSRF_TRUSTED_ORIGINS=http://brunoweel.ru,http://www.brunoweel.ru,https://brunoweel.ru,https://www.brunoweel.ru
+DJANGO_SECURE_SSL_REDIRECT=False
+```
+
+Сгенерировать `SECRET_KEY`:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Накатить миграции, собрать статику, создать администратора:
+
+```bash
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py createsuperuser
+```
+
+```bash
+deactivate
+```
+
+---
+
+## 2. Gunicorn как systemd-сервис
+
+```bash
+sudo cp ~/brunoweel.ru/deploy/gunicorn.service /etc/systemd/system/gunicorn.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now gunicorn
+sudo systemctl status gunicorn
+```
+
+Сервис запускает `gunicorn` от пользователя `brunoweel`, слушает
+`127.0.0.1:8001` и читает переменные из `.env` сам (через `python-dotenv`
+в `settings.py`), отдельный `EnvironmentFile` не нужен.
+
+---
+
+## 3. nginx
+
+```bash
+sudo cp ~/brunoweel.ru/deploy/nginx.conf /etc/nginx/sites-available/brunoweel.ru
+sudo ln -s /etc/nginx/sites-available/brunoweel.ru /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+На этом шаге сайт должен уже открываться по `http://brunoweel.ru`.
+
+---
+
+## 4. SSL (Let's Encrypt)
+
+```bash
+sudo certbot --nginx -d brunoweel.ru -d www.brunoweel.ru
+```
+
+Certbot сам допишет в `/etc/nginx/sites-available/brunoweel.ru` блок с
+`listen 443 ssl` и редирект с 80 на 443, настроит автопродление
+(systemd-таймер `certbot.timer`, он включается установкой пакета).
+
+После этого включить строгие cookie/редирект в `.env`:
+
+```bash
+nano ~/brunoweel.ru/.env
+# DJANGO_SECURE_SSL_REDIRECT=True
+sudo systemctl restart gunicorn
+```
+
+---
+
+## 5. Повторный деплой (обновления)
+
+После `git push` в `main` на локальной машине — на сервере:
+
+```bash
+cd ~/brunoweel.ru
+./deploy/deploy.sh
+```
+
+Скрипт делает `git pull`, пересобирает CSS, ставит зависимости, гоняет
+миграции, `collectstatic` и перезапускает `gunicorn`.
+
+---
+
+## Полезные команды
+
+```bash
+sudo systemctl status gunicorn        # статус приложения
+sudo journalctl -u gunicorn -f        # логи gunicorn (stdout/stderr)
+tail -f ~/brunoweel.ru/gunicorn-error.log
+sudo systemctl status nginx
+sudo nginx -t                         # проверка конфига перед reload
+sudo certbot renew --dry-run          # проверка автопродления SSL
+```
 
 ## Нюансы
 
-- **Статика:** `/static/...` отдаётся Apache напрямую из папки `static/`
-  (правило `!-f` в `.htaccess`) — `collectstatic` для своих css/js не
-  нужен.
-- **Админка Django (`/admin/`)** будет работать, но без своих стилей —
-  её статика не собрана. Если нужна красивая админка, потребуется
-  отдельно настроить `collectstatic` + `Alias` в `.htaccess`.
-
-## Источники
-
-- [Размещение Django-проекта на хостинге — timeweb.com](https://timeweb.com/ru/docs/virtualnyj-hosting/prilozheniya-i-frejmvorki/django/)
-- [Установка virtualenv для Python-проекта — timeweb.com](https://timeweb.com/ru/docs/virtualnyj-hosting/prilozheniya-i-frejmvorki/python-ustanovka-virtualenv/)
+- **База данных** — SQLite (`db.sqlite3` в корне проекта), не в git.
+  Для такого размера сайта (одна витрина + админка) этого достаточно;
+  бэкапить — просто скопировать файл.
+- **Медиа** (загруженные через админку фото) — лежат в `media/` на
+  сервере, тоже не в git. При переезде/масштабировании не забыть их
+  забэкапить отдельно от репозитория.
+- **Статика** собирается в `staticfiles/` командой `collectstatic` и
+  отдаётся nginx напрямую (а не через Django/gunicorn) — см. `location
+  /static/` в [deploy/nginx.conf](deploy/nginx.conf).

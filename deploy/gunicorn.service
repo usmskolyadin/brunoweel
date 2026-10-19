@@ -1,0 +1,19 @@
+[Unit]
+Description=gunicorn daemon for brunoweel.ru
+After=network.target
+
+[Service]
+User=brunoweel
+Group=brunoweel
+WorkingDirectory=/home/brunoweel/brunoweel.ru
+ExecStart=/home/brunoweel/brunoweel.ru/.venv/bin/gunicorn \
+    --workers 3 \
+    --bind 127.0.0.1:8001 \
+    --access-logfile /home/brunoweel/brunoweel.ru/gunicorn-access.log \
+    --error-logfile /home/brunoweel/brunoweel.ru/gunicorn-error.log \
+    doghotel.wsgi:application
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

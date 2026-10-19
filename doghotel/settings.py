@@ -88,3 +88,7 @@ SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "False") == "
 if not DEBUG:
     SESSION_COOKIE_SECURE = SECURE_SSL_REDIRECT
     CSRF_COOKIE_SECURE = SECURE_SSL_REDIRECT
+
+# nginx terminates TLS and proxies plain HTTP to gunicorn; without this,
+# Django would think every request is insecure and loop on SECURE_SSL_REDIRECT.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
