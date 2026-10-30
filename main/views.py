@@ -3,9 +3,11 @@ from django.shortcuts import render
 from .models import (
     CareFeature,
     GalleryImage,
-    KinologyTag,
+    GiftPhoto,
+    KinologyTask,
     Location,
     PackingItem,
+    ScheduleItem,
     SiteContent,
     Stat,
     Tagline,
@@ -21,6 +23,9 @@ def home(request):
         "gallery_images": GalleryImage.objects.all(),
         "locations": Location.objects.prefetch_related("highlights", "photos").all(),
         "packing_items": PackingItem.objects.all(),
-        "kinology_tags": KinologyTag.objects.all(),
+        "schedule_items": ScheduleItem.objects.all(),
+        "kinology_tasks": KinologyTask.objects.all(),
+        "gifts_from_us": GiftPhoto.objects.filter(group=GiftPhoto.Group.FROM_US),
+        "gifts_from_you": GiftPhoto.objects.filter(group=GiftPhoto.Group.FROM_YOU),
     }
     return render(request, "main/index.html", context)

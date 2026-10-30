@@ -49,33 +49,58 @@ class SiteContent(SingletonModel):
     gallery_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100)
     gallery_note = models.TextField("Текст-примечание")
 
-    quiet_hour_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
-    quiet_hour_heading = models.TextField("Заголовок (обычная часть)", default="")
-    quiet_hour_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
-    quiet_hour_text = models.TextField("Текст про тихий час", default="")
-    quiet_hour_photo = models.ImageField("Фото", upload_to="quiet-hour/", blank=True, null=True)
+    schedule_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
+    schedule_heading = models.TextField("Заголовок (обычная часть)", default="")
+    schedule_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
+    schedule_intro = models.TextField("Вводный текст", default="")
+    schedule_note = models.TextField("Подпись под карточками", default="")
 
     locations_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
     locations_heading = models.TextField("Заголовок (обычная часть)", default="")
     locations_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
     locations_intro = models.TextField("Вводный текст про локации", default="")
-    locations_choice_heading = models.CharField("Заголовок блока «Как выбрать локацию»", max_length=200, default="")
-    locations_choice_apartment_title = models.CharField("Название варианта 1", max_length=100, default="Квартира")
-    locations_choice_apartment_text = models.TextField("Описание варианта 1 (квартира)", default="")
-    locations_choice_house_title = models.CharField("Название варианта 2", max_length=100, default="Дом")
-    locations_choice_house_text = models.TextField("Описание варианта 2 (дом)", default="")
+    locations_cta_heading = models.CharField("Заголовок блока-подсказки", max_length=200, default="")
+    locations_cta_text = models.TextField("Текст блока-подсказки", default="")
+    locations_cta_button_text = models.CharField("Текст кнопки блока-подсказки", max_length=100, default="")
 
     packing_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
     packing_heading = models.TextField("Заголовок (обычная часть)", default="")
     packing_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
     packing_intro = models.TextField("Вводный текст", default="")
+    packing_note_heading = models.CharField("Заголовок пометки «Что важно знать заранее»", max_length=200, default="")
+    packing_note_text = models.TextField("Текст пометки «Что важно знать заранее»", default="")
+
+    meet_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
+    meet_heading = models.TextField("Заголовок (обычная часть)", default="")
+    meet_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
+    meet_paragraph_1 = models.TextField("Первый абзац", default="")
+    meet_paragraph_2 = models.TextField("Второй абзац", default="")
+    meet_button_text = models.CharField("Текст кнопки", max_length=100, default="")
 
     kinology_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
     kinology_heading = models.TextField("Заголовок (обычная часть)", default="")
     kinology_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
-    kinology_description = models.TextField("Описание услуги", default="")
+    kinology_name = models.CharField("Имя", max_length=100, default="")
+    kinology_role = models.CharField("Роль/подпись", max_length=200, default="")
+    kinology_photo = models.ImageField("Фото", upload_to="kinology/", blank=True, null=True)
+    kinology_quote = models.TextField("Цитата", default="")
+    kinology_bio_1 = models.TextField("Первый абзац биографии", default="")
+    kinology_bio_2 = models.TextField("Второй абзац биографии", default="")
+    kinology_tasks_heading = models.CharField("Заголовок списка задач", max_length=200, default="")
+    kinology_closing_1 = models.TextField("Заключительная фраза 1", default="")
+    kinology_closing_2 = models.TextField("Заключительная фраза 2", default="")
+    kinology_link_text = models.CharField("Текст ссылки «подробнее»", max_length=200, default="")
     kinology_telegram_url = models.URLField("Ссылка на Telegram", blank=True)
     kinology_instagram_url = models.URLField("Ссылка на Instagram", blank=True)
+
+    gifts_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
+    gifts_heading = models.TextField("Заголовок (обычная часть)", default="")
+    gifts_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
+    gifts_intro = models.TextField("Вводный текст", default="")
+    gifts_from_us_heading = models.CharField("Заголовок «Подарки от нас»", max_length=200, default="")
+    gifts_from_us_text = models.TextField("Текст «Подарки от нас»", default="")
+    gifts_from_you_heading = models.CharField("Заголовок «Подарки от вас»", max_length=200, default="")
+    gifts_from_you_text = models.TextField("Текст «Подарки от вас»", default="")
 
     contact_eyebrow = models.CharField("Надпись над заголовком", max_length=200)
     contact_heading = models.TextField("Заголовок (обычная часть)")
@@ -85,6 +110,7 @@ class SiteContent(SingletonModel):
     telegram_url = models.URLField("Ссылка на Telegram", blank=True)
     whatsapp_url = models.URLField("Ссылка на WhatsApp", blank=True)
     instagram_url = models.URLField("Ссылка на Instagram", blank=True)
+    max_url = models.URLField("Ссылка на MAX", blank=True)
     address = models.TextField("Адрес")
     hours = models.TextField("Часы приёма")
     map_note = models.CharField("Короткая фраза под адресом", max_length=300)
@@ -163,6 +189,7 @@ class GalleryImage(models.Model):
 class Location(models.Model):
     name = models.CharField("Название", max_length=100)
     tagline = models.CharField("Короткая фраза", max_length=200, blank=True)
+    description = models.TextField("Описание", blank=True)
     address = models.CharField("Адрес", max_length=300)
     yandex_maps_url = models.URLField("Ссылка на Яндекс.Карты", blank=True)
     order = models.PositiveIntegerField("Порядок", default=0)
@@ -217,14 +244,50 @@ class PackingItem(models.Model):
         return self.text
 
 
-class KinologyTag(models.Model):
-    text = models.CharField("Текст", max_length=100)
+class ScheduleItem(models.Model):
+    icon = models.CharField("Значок (эмодзи/символ)", max_length=10, default="✳")
+    period = models.CharField("Период дня", max_length=50)
+    description = models.TextField("Описание")
     order = models.PositiveIntegerField("Порядок", default=0)
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "Услуга (тег)"
-        verbose_name_plural = "Кинология — услуги (теги)"
+        verbose_name = "Пункт расписания"
+        verbose_name_plural = "Расписание дня"
 
     def __str__(self):
-        return self.text
+        return self.period
+
+
+class KinologyTask(models.Model):
+    icon = models.CharField("Значок (эмодзи/символ)", max_length=10, default="✳")
+    title = models.CharField("Заголовок", max_length=150)
+    description = models.TextField("Описание")
+    order = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Задача"
+        verbose_name_plural = "Кинология — с какими задачами помогает"
+
+    def __str__(self):
+        return self.title
+
+
+class GiftPhoto(models.Model):
+    class Group(models.TextChoices):
+        FROM_US = "from_us", "Подарки от нас"
+        FROM_YOU = "from_you", "Подарки от вас"
+
+    group = models.CharField("Группа", max_length=20, choices=Group.choices)
+    image = models.ImageField("Фото", upload_to="gifts/")
+    caption = models.CharField("Подпись", max_length=200, blank=True)
+    order = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["group", "order"]
+        verbose_name = "Фото подарка"
+        verbose_name_plural = "Любовь взаимна — подарки"
+
+    def __str__(self):
+        return self.caption or f"Фото #{self.pk}"

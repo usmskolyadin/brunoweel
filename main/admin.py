@@ -3,11 +3,13 @@ from django.contrib import admin
 from .models import (
     CareFeature,
     GalleryImage,
-    KinologyTag,
+    GiftPhoto,
+    KinologyTask,
     Location,
     LocationHighlight,
     LocationPhoto,
     PackingItem,
+    ScheduleItem,
     SiteContent,
     Stat,
     Tagline,
@@ -27,25 +29,38 @@ class SiteContentAdmin(admin.ModelAdmin):
             "about_paragraph_1", "about_paragraph_2", "about_image", "about_image_stamp", "about_link_text",
         )}),
         ("Забота", {"fields": ("care_eyebrow", "care_heading", "care_heading_accent", "care_description")}),
-        ("Тихий час", {"fields": (
-            "quiet_hour_eyebrow", "quiet_hour_heading", "quiet_hour_heading_accent",
-            "quiet_hour_text", "quiet_hour_photo",
+        ("Расписание дня", {"fields": (
+            "schedule_eyebrow", "schedule_heading", "schedule_heading_accent",
+            "schedule_intro", "schedule_note",
         )}),
         ("Локации — заголовок", {"fields": (
             "locations_eyebrow", "locations_heading", "locations_heading_accent", "locations_intro",
-            "locations_choice_heading",
-            "locations_choice_apartment_title", "locations_choice_apartment_text",
-            "locations_choice_house_title", "locations_choice_house_text",
+            "locations_cta_heading", "locations_cta_text", "locations_cta_button_text",
         )}),
         ("Галерея — заголовок", {"fields": ("gallery_eyebrow", "gallery_heading", "gallery_heading_accent", "gallery_note")}),
-        ("Что взять с собой — заголовок", {"fields": ("packing_eyebrow", "packing_heading", "packing_heading_accent", "packing_intro")}),
-        ("Кинология (услуга)", {"fields": (
-            "kinology_eyebrow", "kinology_heading", "kinology_heading_accent", "kinology_description",
-            "kinology_telegram_url", "kinology_instagram_url",
+        ("Что взять с собой — заголовок", {"fields": (
+            "packing_eyebrow", "packing_heading", "packing_heading_accent", "packing_intro",
+            "packing_note_heading", "packing_note_text",
+        )}),
+        ("Будем знакомы", {"fields": (
+            "meet_eyebrow", "meet_heading", "meet_heading_accent",
+            "meet_paragraph_1", "meet_paragraph_2", "meet_button_text",
+        )}),
+        ("Кинология", {"fields": (
+            "kinology_eyebrow", "kinology_heading", "kinology_heading_accent",
+            "kinology_name", "kinology_role", "kinology_photo", "kinology_quote",
+            "kinology_bio_1", "kinology_bio_2", "kinology_tasks_heading",
+            "kinology_closing_1", "kinology_closing_2",
+            "kinology_link_text", "kinology_telegram_url", "kinology_instagram_url",
+        )}),
+        ("Любовь взаимна", {"fields": (
+            "gifts_eyebrow", "gifts_heading", "gifts_heading_accent", "gifts_intro",
+            "gifts_from_us_heading", "gifts_from_us_text",
+            "gifts_from_you_heading", "gifts_from_you_text",
         )}),
         ("Контакты", {"fields": (
             "contact_eyebrow", "contact_heading", "contact_heading_accent", "contact_description",
-            "phone", "telegram_url", "whatsapp_url", "instagram_url", "address", "hours", "map_note",
+            "phone", "telegram_url", "whatsapp_url", "instagram_url", "max_url", "address", "hours", "map_note",
         )}),
         ("Подвал", {"fields": ("footer_tagline", "footer_copyright")}),
     )
@@ -104,7 +119,20 @@ class PackingItemAdmin(admin.ModelAdmin):
     list_editable = ("order",)
 
 
-@admin.register(KinologyTag)
-class KinologyTagAdmin(admin.ModelAdmin):
-    list_display = ("text", "order")
+@admin.register(ScheduleItem)
+class ScheduleItemAdmin(admin.ModelAdmin):
+    list_display = ("period", "icon", "order")
     list_editable = ("order",)
+
+
+@admin.register(KinologyTask)
+class KinologyTaskAdmin(admin.ModelAdmin):
+    list_display = ("title", "icon", "order")
+    list_editable = ("order",)
+
+
+@admin.register(GiftPhoto)
+class GiftPhotoAdmin(admin.ModelAdmin):
+    list_display = ("caption", "group", "image", "order")
+    list_editable = ("order",)
+    list_filter = ("group",)
