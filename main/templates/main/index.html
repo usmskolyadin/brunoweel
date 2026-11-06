@@ -69,7 +69,7 @@
             {% if content.hero_photo %}<img class="hero-photo js-zoomable" src="{{ content.hero_photo.url }}" alt="{{ content.hero_photo_caption }}">{% endif %}
             <div class="photo-caption"><span class="caption-icon">✳</span><span>{{ content.hero_photo_caption }}</span></div>
           </div>
-          <div class="hero-sticker" aria-label="{{ content.hero_sticker_text }}"><span>{{ content.hero_sticker_text }}</span><i aria-hidden="true">☀</i></div>
+          <div class="hero-sticker" aria-label="{{ content.hero_sticker_text }}"><span>{{ content.hero_sticker_text|linebreaksbr }}</span><i aria-hidden="true">☀</i></div>
           <div class="hero-scribble" aria-hidden="true">♡</div>
         </div>
       </section>
