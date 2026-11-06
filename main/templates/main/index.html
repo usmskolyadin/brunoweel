@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     <script src="{% static 'js/site.js' %}" defer></script>
+
   </head>
   <body data-theme="playful" class="min-h-screen bg-[var(--page)] text-[var(--ink)] antialiased">
     <header class="site-header">
@@ -67,7 +68,6 @@
         <div class="hero-art relative mx-auto w-full max-w-xl">
           <div class="hero-photo-wrap">
             {% if content.hero_photo %}<img class="hero-photo js-zoomable" src="{{ content.hero_photo.url }}" alt="{{ content.hero_photo_caption }}">{% endif %}
-            <div class="photo-caption"><span class="caption-icon">✳</span><span>{{ content.hero_photo_caption }}</span></div>
           </div>
           <div class="hero-sticker" aria-label="{{ content.hero_sticker_text }}"><span>{{ content.hero_sticker_text|linebreaksbr }}</span><i aria-hidden="true">☀</i></div>
           <div class="hero-scribble" aria-hidden="true">♡</div>
@@ -151,8 +151,14 @@
             <article class="location-card">
               {% with photos=location.photos.all %}
               {% if photos %}
-              <div class="location-photos">
-                {% for photo in photos %}<img class="js-zoomable" src="{{ photo.image.url }}" alt="{{ location.name }}">{% endfor %}
+              <div class="location-carousel-wrap">
+                <div class="location-photos auto-carousel" id="location-photos-{{ location.id }}">
+                  {% for photo in photos %}<img class="js-zoomable" src="{{ photo.image.url }}" alt="{{ location.name }}">{% endfor %}
+                </div>
+                {% if photos|length > 1 %}
+                <button class="mini-arrow carousel-prev" type="button" aria-label="Предыдущее фото" data-carousel-target="location-photos-{{ location.id }}">‹</button>
+                <button class="mini-arrow carousel-next" type="button" aria-label="Следующее фото" data-carousel-target="location-photos-{{ location.id }}">›</button>
+                {% endif %}
               </div>
               {% endif %}
               {% endwith %}
@@ -192,7 +198,7 @@
             <p class="gallery-note">{{ content.gallery_note|linebreaksbr }}</p>
           </div>
           <div class="gallery-carousel-wrap">
-            <div class="gallery-carousel" id="gallery-carousel">
+            <div class="gallery-carousel auto-carousel" id="gallery-carousel">
               {% for img in gallery_images %}
               <figure class="gallery-item">
                 <img class="js-zoomable" src="{{ img.image.url }}" alt="{{ img.caption }}">
@@ -203,24 +209,6 @@
             <button class="carousel-arrow carousel-prev" type="button" aria-label="Предыдущие фото" data-carousel-target="gallery-carousel">‹</button>
             <button class="carousel-arrow carousel-next" type="button" aria-label="Следующие фото" data-carousel-target="gallery-carousel">›</button>
           </div>
-        </div>
-      </section>
-
-      <section class="packing-section section-pad" id="packing">
-        <div class="mx-auto max-w-7xl px-5 lg:px-8">
-          <div class="section-heading flex flex-col justify-between gap-5 md:flex-row md:items-end">
-            <div><p class="eyebrow">{{ content.packing_eyebrow }}</p><h2>{{ content.packing_heading|linebreaksbr }}<br><span class="heading-accent heading-yellow">{{ content.packing_heading_accent|wobble_last_word }}</span></h2></div>
-            <p class="section-description max-w-md">{{ content.packing_intro }}</p>
-          </div>
-          <ul class="packing-list">
-            {% for item in packing_items %}<li><span class="packing-icon" aria-hidden="true">✓</span>{{ item.text }}</li>{% endfor %}
-          </ul>
-          {% if content.packing_note_text %}
-          <div class="packing-note">
-            <span class="packing-note-icon" aria-hidden="true">!</span>
-            <div><strong>{{ content.packing_note_heading }}</strong><p>{{ content.packing_note_text }}</p></div>
-          </div>
-          {% endif %}
         </div>
       </section>
 
@@ -271,6 +259,24 @@
         </div>
       </section>
 
+      <section class="packing-section section-pad" id="packing">
+        <div class="mx-auto max-w-7xl px-5 lg:px-8">
+          <div class="section-heading flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div><p class="eyebrow">{{ content.packing_eyebrow }}</p><h2>{{ content.packing_heading|linebreaksbr }}<br><span class="heading-accent heading-yellow">{{ content.packing_heading_accent|wobble_last_word }}</span></h2></div>
+            <p class="section-description max-w-md">{{ content.packing_intro }}</p>
+          </div>
+          <ul class="packing-list">
+            {% for item in packing_items %}<li><span class="packing-icon" aria-hidden="true">✓</span>{{ item.text }}</li>{% endfor %}
+          </ul>
+          {% if content.packing_note_text %}
+          <div class="packing-note">
+            <span class="packing-note-icon" aria-hidden="true">!</span>
+            <div><strong>{{ content.packing_note_heading }}</strong><p>{{ content.packing_note_text }}</p></div>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+
       <section class="gifts-section section-pad" id="gifts">
         <div class="mx-auto max-w-7xl px-5 lg:px-8">
           <div class="section-heading flex flex-col justify-between gap-5 md:flex-row md:items-end">
@@ -281,7 +287,7 @@
           <div class="gifts-group">
             <h3>{{ content.gifts_from_us_heading }}</h3>
             <p class="gifts-group-text">{{ content.gifts_from_us_text }}</p>
-            <div class="gifts-carousel">
+            <div class="gifts-carousel auto-carousel">
               {% for gift in gifts_from_us %}
               <figure class="gifts-item"><img class="js-zoomable" src="{{ gift.image.url }}" alt="{{ gift.caption }}">{% if gift.caption %}<figcaption>{{ gift.caption }}</figcaption>{% endif %}</figure>
               {% endfor %}
@@ -302,6 +308,43 @@
         </div>
       </section>
 
+      <section class="reviews-section section-pad" id="reviews">
+        <span class="paw-print paw-coral paw-reviews-one" aria-hidden="true"></span>
+        <div class="mx-auto max-w-7xl px-5 lg:px-8">
+          <div class="section-heading flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div><p class="eyebrow">{{ content.reviews_eyebrow }}</p><h2>{{ content.reviews_heading|linebreaksbr }}<br><span class="heading-accent heading-green">{{ content.reviews_heading_accent|wobble_last_word }}</span></h2></div>
+            <p class="section-description max-w-md">{{ content.reviews_note }}</p>
+          </div>
+          {% if reviews %}
+          <div class="gallery-carousel-wrap reviews-carousel-wrap">
+            <div class="reviews-carousel auto-carousel" id="reviews-carousel">
+              {% for review in reviews %}
+              <article class="review-card">
+                <div class="review-stars" aria-label="Оценка {{ review.rating }} из 5">
+                  {% for i in "12345" %}<span class="review-star{% if forloop.counter <= review.rating %} is-filled{% endif %}">★</span>{% endfor %}
+                </div>
+                <p class="review-text">{{ review.text|linebreaksbr }}</p>
+                {% with photos=review.photos.all %}
+                {% if photos %}
+                <div class="review-photos">
+                  {% for photo in photos %}<img class="js-zoomable" src="{{ photo.image.url }}" alt="Фото к отзыву — {{ review.name }}">{% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+                <div class="review-meta">
+                  <span class="review-name">{{ review.name }}</span>
+                  <span class="review-date">{{ review.created_at|date:"d.m.Y, H:i" }}</span>
+                </div>
+              </article>
+              {% endfor %}
+            </div>
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Предыдущие отзывы" data-carousel-target="reviews-carousel">‹</button>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Следующие отзывы" data-carousel-target="reviews-carousel">›</button>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+
       <section class="contact-section section-pad" id="contacts">
         <span class="paw-print paw-yellow paw-contact-one" aria-hidden="true"></span>
         <div class="contact-inner mx-auto grid max-w-7xl gap-10 px-5 md:grid-cols-[1fr_0.8fr] md:items-center lg:px-8">
@@ -309,12 +352,15 @@
             <p class="eyebrow">{{ content.contact_eyebrow }}</p>
             <h2>{{ content.contact_heading|linebreaksbr }}<br><span class="heading-accent heading-yellow">{{ content.contact_heading_accent|wobble_last_word }}</span></h2>
             <p class="contact-description">{{ content.contact_description }}</p>
-            <div class="contact-actions flex flex-wrap items-center gap-4">
+            <div class="contact-actions">
               <a class="button button-light" href="tel:{{ content.phone_digits }}">{{ content.phone }} <span aria-hidden="true">↗</span></a>
-              {% if content.telegram_url %}<a class="contact-messenger" href="{{ content.telegram_url }}" target="_blank" rel="noopener">Telegram <span aria-hidden="true">↗</span></a>{% endif %}
-              {% if content.whatsapp_url %}<a class="contact-messenger" href="{{ content.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp <span aria-hidden="true">↗</span></a>{% endif %}
-              {% if content.instagram_url %}<a class="contact-messenger" href="{{ content.instagram_url }}" target="_blank" rel="noopener">Instagram <span aria-hidden="true">↗</span></a>{% endif %}
-              {% if content.max_url %}<a class="contact-messenger" href="{{ content.max_url }}" target="_blank" rel="noopener">MAX <span aria-hidden="true">↗</span></a>{% endif %}
+              <div class="contact-messengers">
+                {% if content.telegram_url %}<a class="contact-messenger" href="{{ content.telegram_url }}" target="_blank" rel="noopener">Telegram <span aria-hidden="true">↗</span></a>{% endif %}
+                {% if content.whatsapp_url %}<a class="contact-messenger" href="{{ content.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp <span aria-hidden="true">↗</span></a>{% endif %}
+                {% if content.instagram_url %}<a class="contact-messenger" href="{{ content.instagram_url }}" target="_blank" rel="noopener">Instagram <span aria-hidden="true">↗</span></a>{% endif %}
+                {% if content.max_url %}<a class="contact-messenger" href="{{ content.max_url }}" target="_blank" rel="noopener">MAX <span aria-hidden="true">↗</span></a>{% endif %}
+                {% if content.yandex_maps_url %}<a class="contact-messenger" href="{{ content.yandex_maps_url }}" target="_blank" rel="noopener">Яндекс Карты <span aria-hidden="true">↗</span></a>{% endif %}
+              </div>
             </div>
           </div>
           <div class="contact-details">

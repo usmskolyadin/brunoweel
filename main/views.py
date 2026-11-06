@@ -7,6 +7,7 @@ from .models import (
     KinologyTask,
     Location,
     PackingItem,
+    Review,
     ScheduleItem,
     SiteContent,
     Stat,
@@ -27,5 +28,6 @@ def home(request):
         "kinology_tasks": KinologyTask.objects.all(),
         "gifts_from_us": GiftPhoto.objects.filter(group=GiftPhoto.Group.FROM_US),
         "gifts_from_you": GiftPhoto.objects.filter(group=GiftPhoto.Group.FROM_YOU),
+        "reviews": Review.objects.prefetch_related("photos").all(),
     }
     return render(request, "main/index.html", context)

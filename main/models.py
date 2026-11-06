@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class SingletonModel(models.Model):
@@ -102,6 +103,11 @@ class SiteContent(SingletonModel):
     gifts_from_you_heading = models.CharField("Заголовок «Подарки от вас»", max_length=200, default="")
     gifts_from_you_text = models.TextField("Текст «Подарки от вас»", default="")
 
+    reviews_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
+    reviews_heading = models.TextField("Заголовок (обычная часть)", default="")
+    reviews_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
+    reviews_note = models.TextField("Текст-примечание", default="")
+
     contact_eyebrow = models.CharField("Надпись над заголовком", max_length=200)
     contact_heading = models.TextField("Заголовок (обычная часть)")
     contact_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100)
@@ -111,6 +117,7 @@ class SiteContent(SingletonModel):
     whatsapp_url = models.URLField("Ссылка на WhatsApp", blank=True)
     instagram_url = models.URLField("Ссылка на Instagram", blank=True)
     max_url = models.URLField("Ссылка на MAX", blank=True)
+    yandex_maps_url = models.URLField("Ссылка на Яндекс Карты", blank=True)
     address = models.TextField("Адрес")
     hours = models.TextField("Часы приёма")
     map_note = models.CharField("Короткая фраза под адресом", max_length=300)
@@ -291,3 +298,35 @@ class GiftPhoto(models.Model):
 
     def __str__(self):
         return self.caption or f"Фото #{self.pk}"
+
+
+class Review(models.Model):
+    RATING_CHOICES = [(i, "★" * i) for i in range(1, 6)]
+
+    name = models.CharField("Имя и фамилия", max_length=150)
+    rating = models.PositiveSmallIntegerField("Оценка", choices=RATING_CHOICES, default=5)
+    text = models.TextField("Текст отзыва")
+    created_at = models.DateTimeField("Дата и время отзыва", default=timezone.now)
+    order = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["-created_at", "-order"]
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
+
+    def __str__(self):
+        return f"{self.name} ({self.rating}★)"
+
+
+class ReviewPhoto(models.Model):
+    review = models.ForeignKey(Review, related_name="photos", on_delete=models.CASCADE, verbose_name="Отзыв")
+    image = models.ImageField("Фото", upload_to="reviews/")
+    order = models.PositiveIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Фото к отзыву"
+        verbose_name_plural = "Фото к отзыву"
+
+    def __str__(self):
+        return f"Фото #{self.pk}"

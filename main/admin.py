@@ -9,6 +9,8 @@ from .models import (
     LocationHighlight,
     LocationPhoto,
     PackingItem,
+    Review,
+    ReviewPhoto,
     ScheduleItem,
     SiteContent,
     Stat,
@@ -58,9 +60,13 @@ class SiteContentAdmin(admin.ModelAdmin):
             "gifts_from_us_heading", "gifts_from_us_text",
             "gifts_from_you_heading", "gifts_from_you_text",
         )}),
+        ("Отзывы — заголовок", {"fields": (
+            "reviews_eyebrow", "reviews_heading", "reviews_heading_accent", "reviews_note",
+        )}),
         ("Контакты", {"fields": (
             "contact_eyebrow", "contact_heading", "contact_heading_accent", "contact_description",
-            "phone", "telegram_url", "whatsapp_url", "instagram_url", "max_url", "address", "hours", "map_note",
+            "phone", "telegram_url", "whatsapp_url", "instagram_url", "max_url", "yandex_maps_url",
+            "address", "hours", "map_note",
         )}),
         ("Подвал", {"fields": ("footer_tagline", "footer_copyright")}),
     )
@@ -136,3 +142,16 @@ class GiftPhotoAdmin(admin.ModelAdmin):
     list_display = ("caption", "group", "image", "order")
     list_editable = ("order",)
     list_filter = ("group",)
+
+
+class ReviewPhotoInline(admin.TabularInline):
+    model = ReviewPhoto
+    extra = 1
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ("name", "rating", "created_at", "order")
+    list_editable = ("order",)
+    list_filter = ("rating",)
+    inlines = [ReviewPhotoInline]
