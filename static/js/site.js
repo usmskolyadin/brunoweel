@@ -44,3 +44,13 @@ lightbox.querySelector(".lightbox-close").addEventListener("click", closeLightbo
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeLightbox();
 });
+
+document.querySelectorAll("[data-carousel-target]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const track = document.getElementById(button.dataset.carouselTarget);
+    if (!track) return;
+    const card = track.querySelector(":scope > *");
+    const step = card ? card.getBoundingClientRect().width + 16 : track.clientWidth * 0.8;
+    track.scrollBy({ left: button.classList.contains("carousel-prev") ? -step : step, behavior: "smooth" });
+  });
+});

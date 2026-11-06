@@ -191,10 +191,17 @@
             <div><p class="eyebrow">{{ content.gallery_eyebrow }}</p><h2>{{ content.gallery_heading|linebreaksbr }}<br><span class="heading-accent heading-green">{{ content.gallery_heading_accent|wobble_last_word }}</span></h2></div>
             <p class="gallery-note">{{ content.gallery_note|linebreaksbr }}</p>
           </div>
-          <div class="gallery-grid">
-            {% for img in gallery_images %}
-            <figure class="gallery-item"><img class="js-zoomable" src="{{ img.image.url }}" alt="{{ img.caption }}"></figure>
-            {% endfor %}
+          <div class="gallery-carousel-wrap">
+            <div class="gallery-carousel" id="gallery-carousel">
+              {% for img in gallery_images %}
+              <figure class="gallery-item">
+                <img class="js-zoomable" src="{{ img.image.url }}" alt="{{ img.caption }}">
+                {% if img.caption %}<figcaption>{{ img.caption }}</figcaption>{% endif %}
+              </figure>
+              {% endfor %}
+            </div>
+            <button class="carousel-arrow carousel-prev" type="button" aria-label="Предыдущие фото" data-carousel-target="gallery-carousel">‹</button>
+            <button class="carousel-arrow carousel-next" type="button" aria-label="Следующие фото" data-carousel-target="gallery-carousel">›</button>
           </div>
         </div>
       </section>
