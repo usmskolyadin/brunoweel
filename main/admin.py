@@ -30,6 +30,9 @@ class SiteContentAdmin(admin.ModelAdmin):
             "about_eyebrow", "about_heading", "about_heading_accent",
             "about_paragraph_1", "about_paragraph_2", "about_image", "about_image_stamp", "about_link_text",
         )}),
+        ("Предыстория", {"fields": (
+            "story_eyebrow", "story_heading", "story_heading_accent", "story_text",
+        )}),
         ("Забота", {"fields": ("care_eyebrow", "care_heading", "care_heading_accent", "care_description")}),
         ("Расписание дня", {"fields": (
             "schedule_eyebrow", "schedule_heading", "schedule_heading_accent",

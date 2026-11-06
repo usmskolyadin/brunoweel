@@ -40,6 +40,11 @@ class SiteContent(SingletonModel):
     about_image_stamp = models.CharField("Текст на фото", max_length=100, blank=True)
     about_link_text = models.CharField("Текст ссылки вниз", max_length=200)
 
+    story_eyebrow = models.CharField("Надпись над заголовком", max_length=200, default="")
+    story_heading = models.TextField("Заголовок (обычная часть)", default="")
+    story_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100, default="")
+    story_text = models.TextField("Текст предыстории", default="", help_text="Пустая строка между абзацами — новый абзац.")
+
     care_eyebrow = models.CharField("Надпись над заголовком", max_length=200)
     care_heading = models.TextField("Заголовок (обычная часть)")
     care_heading_accent = models.CharField("Заголовок (выделенная часть)", max_length=100)

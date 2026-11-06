@@ -99,6 +99,16 @@
         </div>
       </section>
 
+      <section class="story-section section-pad" id="story">
+        <span class="paw-print paw-yellow paw-story-one" aria-hidden="true"></span>
+        <span class="paw-print paw-coral paw-story-two" aria-hidden="true"></span>
+        <div class="mx-auto max-w-3xl px-5 lg:px-8">
+          <p class="eyebrow">{{ content.story_eyebrow }}</p>
+          <h2>{{ content.story_heading|linebreaksbr }}<br><span class="heading-accent heading-green">{{ content.story_heading_accent|wobble_last_word }}</span></h2>
+          <div class="story-text">{{ content.story_text|linebreaks }}</div>
+        </div>
+      </section>
+
       <section class="care-section section-pad" id="care">
         <span class="paw-print paw-yellow paw-care-one" aria-hidden="true"></span>
         <span class="paw-print paw-coral paw-care-two" aria-hidden="true"></span>
